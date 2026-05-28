@@ -18,14 +18,14 @@ function expandHome(p) {
   return p;
 }
 
-function install(destPath) {
+function install(destPath, force = false) {
   const dest = path.resolve(expandHome(destPath));
 
-  if (fs.existsSync(dest)) {
+  if (fs.existsSync(dest) && !force) {
     const files = fs.readdirSync(dest);
     if (files.length > 0) {
       console.log(`Directory ${dest} already exists and is not empty.`);
-      console.log('Use "agent-hub upgrade" to update an existing installation.');
+      console.log('Use "agent-hub upgrade" to update, or "agent-hub install --force" to overwrite.');
       process.exit(1);
     }
   }
@@ -130,10 +130,10 @@ function help() {
 Agent Hub - Universal Agent Plugin System
 
 Usage:
-  agent-hub install <path>   Install to a local directory
-  agent-hub upgrade [path]   Upgrade core files (preserves user data)
-  agent-hub list [path]      Show installed files
-  agent-hub help             Show this help
+  agent-hub install <path> [--force]   Install to a local directory
+  agent-hub upgrade [path]             Upgrade core files (preserves user data)
+  agent-hub list [path]                Show installed files
+  agent-hub help                       Show this help
 
 Examples:
   npx agent-hub install ~/.agent-hub        # macOS / Linux
@@ -201,10 +201,13 @@ function findInstall() {
 const [,, cmd, ...args] = process.argv;
 
 switch (cmd) {
-  case 'install':
-    if (!args[0]) { console.log('Usage: agent-hub install <path>'); process.exit(1); }
-    install(args[0]);
+  case 'install': {
+    const force = args.includes('--force') || args.includes('-f');
+    const installPath = args.find(a => !a.startsWith('-'));
+    if (!installPath) { console.log('Usage: agent-hub install <path> [--force]'); process.exit(1); }
+    install(installPath, force);
     break;
+  }
   case 'upgrade':
     upgrade(args[0]);
     break;
