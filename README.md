@@ -1,23 +1,79 @@
 # Agent Hub
 
-A universal agent plugin system that can be plugged into any editor or AI agent. Built on a Skills-based architecture with persistent roles, memory, and knowledge management.
+[中文](./README.zh-CN.md)
 
-## Overview
+A universal agent plugin system built on a Skills-based architecture with persistent roles, memory, and knowledge management. Plugs into any editor or AI agent that supports the Skills format (Cursor, Claude Code, etc.).
 
-Agent Hub is a meta-agent framework that acts as an orchestrator — it can create specialized roles, acquire skills dynamically, maintain persistent memory across sessions, and build a knowledge base tailored to you.
+## Quick Start
 
-### Core Concepts
+### 1. Install
 
-- **Roles** — Specialized agents with defined capabilities, skills, and tags. Created dynamically based on user needs.
-- **Skills** — Modular Markdown files that define reusable capabilities. Can be discovered via `find-skill` and installed permanently.
-- **Memory** — Persistent context across sessions, both system-wide and per-role.
-- **Knowledge Base** — Personal and domain knowledge files for reference during task execution.
-- **Logs** — Structured task logs for audit trails and memory extraction.
+```bash
+npx agent-hub install ~/.agent-hub
+```
+
+This copies all core files (roles, skills, memory templates, knowledge base templates) to your local directory.
+
+### 2. Personalize
+
+Edit `~/.agent-hub/knowledgebase/personal.md` with your tech stack, coding habits, and preferences.
+
+### 3. Use
+
+Load `skills/orchestrator.md` in your AI agent. Then submit tasks — the orchestrator will automatically match or create roles, execute, log results, and update memory.
+
+```
+Your request
+  → orchestrator analyzes
+  → matches existing role? → delegates
+  → no match? → creates new role + installs skills → executes
+  → logs task + updates memory
+```
+
+### 4. Upgrade
+
+```bash
+npx agent-hub upgrade ~/.agent-hub
+```
+
+Only core template files are updated. Your custom roles, skills, memory, knowledge base, and logs are **never touched**.
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `agent-hub install <path>` | Install to a local directory |
+| `agent-hub upgrade [path]` | Upgrade core files (preserves user data) |
+| `agent-hub list [path]` | Show installed core and user files |
+| `agent-hub help` | Show help |
+
+## Integration
+
+### Cursor
+
+Point `.cursor/rules` or project settings to your installation directory's `skills/` folder. Cursor will load skill prompts automatically.
+
+### Claude Code
+
+Reference skill files in your `CLAUDE.md`, or load `skills/orchestrator.md` directly as a system prompt.
+
+## Core Concepts
+
+| Concept | What It Is |
+|---------|-----------|
+| **Roles** | Specialized agents with defined capabilities, skills, and tags. Created dynamically based on user needs. |
+| **Skills** | Modular Markdown files that define reusable capabilities. Discovered via `find-skill` and installed permanently. |
+| **Memory** | Persistent context across sessions — global (`memory/system.md`) and per-role (`memory/<role>.md`). |
+| **Knowledge Base** | Personal and domain knowledge files (`knowledgebase/`) referenced during task execution. |
+| **Logs** | Structured task logs in `logs/` for audit trails and memory extraction. |
 
 ## Project Structure
 
+After installation, your local directory looks like this:
+
 ```
-agent-hub/
+~/.agent-hub/
+├── .core-manifest.json     # Tracks core files for upgrades
 ├── roles/
 │   ├── index.json          # Role registry
 │   └── orchestrator.yaml   # Master coordinator role
@@ -31,57 +87,8 @@ agent-hub/
 │   └── system.md           # Global system memory
 ├── knowledgebase/
 │   └── personal.md         # Personal preferences and knowledge
-├── logs/                   # Task execution logs
-└── mcp/                    # MCP server configurations
+└── logs/                   # Task execution logs (auto-generated)
 ```
-
-## How It Works
-
-1. **User submits a request** — The orchestrator analyzes the request.
-2. **Role matching** — Existing roles are checked against the request (tags, description, skills).
-3. **Delegation or creation** — If a match is found, the task is delegated. Otherwise, a new role is created with the required skills.
-4. **Skill acquisition** — Missing skills are discovered via `find-skill` and installed permanently.
-5. **Logging** — Every task is logged with timestamps, steps taken, and outcomes.
-6. **Memory extraction** — Key insights from tasks are extracted into persistent memory for future use.
-
-## Roles
-
-| Role | Description | Tags |
-|------|-------------|------|
-| `orchestrator` | Master coordinator. Routes tasks, creates roles, manages skills and memory. | `core`, `coordinator`, `meta` |
-
-New roles are created automatically when existing ones cannot fulfill a request.
-
-## Skills
-
-| Skill | Purpose |
-|-------|---------|
-| `orchestrator` | Task routing, role matching, and system coordination |
-| `create-role` | Define and register new roles dynamically |
-| `match-role` | Find the best existing role for a given request |
-| `task-logger` | Log every task execution for audit and memory extraction |
-| `memory-manager` | Maintain persistent memory across sessions |
-
-## Knowledge Base
-
-The `knowledgebase/` directory stores reference material:
-
-- `personal.md` — Your personal preferences, habits, and domain knowledge. Edit this file directly to teach the system about you.
-
-Additional knowledge files can be added as needed for specific domains or projects.
-
-## Memory System
-
-Memory is organized in two layers:
-
-- **`memory/system.md`** — Global memory shared across all roles (project conventions, user preferences, learned patterns).
-- **`memory/<role-name>.md`** — Per-role memory for specialized context.
-
-Memory is automatically updated after task completion through insight extraction.
-
-## Usage
-
-This project is designed to be used as a plugin for editors or AI agents that support the Skills format. Point your agent's skill directory to this repository to enable the full role orchestration system.
 
 ## License
 

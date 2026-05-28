@@ -1,14 +1,15 @@
 {
   "name": "agent-hub",
   "version": "1.0.0",
-  "description": "A universal agent plugin system that can be plugged into any editor or AI agent. Built on a Skills-based architecture with persistent roles, memory, and knowledge management.",
-  "main": "index.js",
+  "description": "A universal agent plugin system built on a Skills-based architecture with persistent roles, memory, and knowledge management.",
+  "bin": {
+    "agent-hub": "./cli.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["agent", "ai", "skills", "orchestrator", "plugin"],
   "license": "MIT",
   "devDependencies": {
     "husky": "^9.1.7"
