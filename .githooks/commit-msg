@@ -1,0 +1,43 @@
+#!/bin/bash
+# Git commit-msg hook: 强制单行中文提交信息
+
+COMMIT_MSG_FILE="$1"
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# 去除注释和空行
+TRIMMED=$(echo "$COMMIT_MSG" | sed '/^#/d' | sed '/^$/d')
+
+# 规则 1: 只能是一行
+LINE_COUNT=$(echo "$TRIMMED" | wc -l | tr -d ' ')
+if [ "$LINE_COUNT" -gt 1 ]; then
+    echo "❌ 提交信息只能是一行，不能有多行内容"
+    echo "   你的提交信息共 $LINE_COUNT 行"
+    exit 1
+fi
+
+# 规则 2: 不能为空
+if [ -z "$TRIMMED" ]; then
+    echo "❌ 提交信息不能为空"
+    exit 1
+fi
+
+# 规则 3: 必须包含中文字符 (CJK)
+if ! echo "$TRIMMED" | perl -CS -ne 'print if /\p{Han}/' | grep -q .; then
+    echo "❌ 提交信息必须包含中文"
+    echo "   请使用中文描述本次提交"
+    exit 1
+fi
+
+# 规则 4: 末尾不能有句号
+if echo "$TRIMMED" | grep -q '。$'; then
+    echo "❌ 提交信息末尾不能有句号"
+    exit 1
+fi
+
+# 规则 5: 长度 <= 50 字符
+LENGTH=$(echo "$TRIMMED" | wc -c | tr -d ' ')
+if [ "$LENGTH" -gt 50 ]; then
+    echo "⚠️  警告: 提交信息超过 50 个字符 (当前 $LENGTH)，建议简短描述"
+fi
+
+exit 0
