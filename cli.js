@@ -2,12 +2,24 @@
 
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
 const TEMPLATES_DIR = path.join(__dirname, 'templates', 'agent-hub');
 const CORE_MANIFEST = '.core-manifest.json';
 
+function normalizePath(p) {
+  return p.split(path.sep).join('/');
+}
+
+function expandHome(p) {
+  if (p.startsWith('~')) {
+    return path.join(os.homedir(), p.slice(1).replace(/^[/\\]/, ''));
+  }
+  return p;
+}
+
 function install(destPath) {
-  const dest = path.resolve(destPath);
+  const dest = path.resolve(expandHome(destPath));
 
   if (fs.existsSync(dest)) {
     const files = fs.readdirSync(dest);
@@ -25,7 +37,7 @@ function install(destPath) {
   const manifest = {
     installed_at: new Date().toISOString(),
     core_files: copiedFiles.map(f => ({
-      path: f,
+      path: normalizePath(f),
       hash: fileHash(path.join(dest, f))
     }))
   };
@@ -37,7 +49,7 @@ function install(destPath) {
 }
 
 function upgrade(destPath) {
-  const dest = destPath ? path.resolve(destPath) : findInstall();
+  const dest = destPath ? path.resolve(expandHome(destPath)) : findInstall();
   if (!dest) {
     console.log('No Agent Hub installation found. Use "agent-hub install <path>" first.');
     process.exit(1);
@@ -54,8 +66,8 @@ function upgrade(destPath) {
   const upgradedFiles = [];
 
   for (const entry of manifest.core_files) {
-    const src = path.join(TEMPLATES_DIR, entry.path);
-    const dst = path.join(dest, entry.path);
+    const src = path.join(TEMPLATES_DIR, ...entry.path.split('/'));
+    const dst = path.join(dest, ...entry.path.split('/'));
 
     if (!fs.existsSync(src)) continue;
 
@@ -84,7 +96,7 @@ function upgrade(destPath) {
 }
 
 function list(destPath) {
-  const dest = destPath ? path.resolve(destPath) : findInstall();
+  const dest = destPath ? path.resolve(expandHome(destPath)) : findInstall();
   if (!dest) {
     console.log('No Agent Hub installation found.');
     process.exit(1);
@@ -106,7 +118,8 @@ function list(destPath) {
   const corePaths = manifest ? manifest.core_files.map(c => c.path) : [];
   console.log('\nUser files:');
   walkDir(dest, dest).forEach(f => {
-    if (f !== CORE_MANIFEST && !corePaths.includes(f)) {
+    const normalized = normalizePath(f);
+    if (normalized !== CORE_MANIFEST && !corePaths.includes(normalized)) {
       console.log(`  ${f}`);
     }
   });
@@ -123,7 +136,8 @@ Usage:
   agent-hub help             Show this help
 
 Examples:
-  npx agent-hub install ~/.agent-hub
+  npx agent-hub install ~/.agent-hub        # macOS / Linux
+  npx agent-hub install %USERPROFILE%\\.agent-hub # Windows
   npx agent-hub upgrade
   npx agent-hub list
 
@@ -177,7 +191,7 @@ function walkDir(base, dir) {
 function findInstall() {
   const cwd = process.cwd();
   if (fs.existsSync(path.join(cwd, CORE_MANIFEST))) return cwd;
-  const home = path.join(require('os').homedir(), '.agent-hub');
+  const home = path.join(os.homedir(), '.agent-hub');
   if (fs.existsSync(path.join(home, CORE_MANIFEST))) return home;
   return null;
 }

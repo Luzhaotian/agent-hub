@@ -9,18 +9,20 @@ A universal agent plugin system built on a Skills-based architecture with persis
 ### 1. Install
 
 ```bash
-npx agent-hub install ~/.agent-hub
+# From npm (after publishing)
+npx agent-hub install ~/.agent-hub               # macOS / Linux
+npx agent-hub install %USERPROFILE%\.agent-hub   # Windows
+
+# Or clone and run locally
+git clone https://github.com/Luzhaotian/agent-hub.git
+cd agent-hub && node cli.js install ~/.agent-hub
 ```
 
-This copies all core files (roles, skills, memory templates, knowledge base templates) to your local directory.
+Supports `~` path expansion — `~` is automatically resolved to your home directory on all platforms.
 
-### 2. Personalize
+### 2. Use
 
-Edit `~/.agent-hub/knowledgebase/personal.md` with your tech stack, coding habits, and preferences.
-
-### 3. Use
-
-Load `skills/orchestrator.md` in your AI agent. Then submit tasks — the orchestrator will automatically match or create roles, execute, log results, and update memory.
+Load `skills/orchestrator.md` in your AI agent, then submit tasks:
 
 ```
 Your request
@@ -30,13 +32,16 @@ Your request
   → logs task + updates memory
 ```
 
-### 4. Upgrade
+Edit `knowledgebase/personal.md` to teach the system about your tech stack and preferences.
+
+### 3. Upgrade
 
 ```bash
 npx agent-hub upgrade ~/.agent-hub
+# or: node cli.js upgrade ~/.agent-hub
 ```
 
-Only core template files are updated. Your custom roles, skills, memory, knowledge base, and logs are **never touched**.
+Only core files are updated. Your roles, skills, memory, knowledge base, and logs are **never touched**.
 
 ## Commands
 
@@ -51,43 +56,31 @@ Only core template files are updated. Your custom roles, skills, memory, knowled
 
 ### Cursor
 
-Point `.cursor/rules` or project settings to your installation directory's `skills/` folder. Cursor will load skill prompts automatically.
+Point `.cursor/rules` or project settings to your installation directory's `skills/` folder.
 
 ### Claude Code
 
-Reference skill files in your `CLAUDE.md`, or load `skills/orchestrator.md` directly as a system prompt.
+Reference skill files in your `CLAUDE.md`, or load `skills/orchestrator.md` as a system prompt.
 
 ## Core Concepts
 
-| Concept | What It Is |
-|---------|-----------|
-| **Roles** | Specialized agents with defined capabilities, skills, and tags. Created dynamically based on user needs. |
-| **Skills** | Modular Markdown files that define reusable capabilities. Discovered via `find-skill` and installed permanently. |
-| **Memory** | Persistent context across sessions — global (`memory/system.md`) and per-role (`memory/<role>.md`). |
-| **Knowledge Base** | Personal and domain knowledge files (`knowledgebase/`) referenced during task execution. |
-| **Logs** | Structured task logs in `logs/` for audit trails and memory extraction. |
+| Concept | Description |
+|---------|-------------|
+| **Roles** | Specialized agents with capabilities, skills, and tags. Created dynamically. |
+| **Skills** | Modular Markdown files defining reusable capabilities. |
+| **Memory** | Persistent context across sessions — global and per-role. |
+| **Knowledge Base** | Personal and domain knowledge referenced during tasks. |
+| **Logs** | Structured task logs for audit and memory extraction. |
 
 ## Project Structure
 
-After installation, your local directory looks like this:
-
 ```
 ~/.agent-hub/
-├── .core-manifest.json     # Tracks core files for upgrades
-├── roles/
-│   ├── index.json          # Role registry
-│   └── orchestrator.yaml   # Master coordinator role
-├── skills/
-│   ├── orchestrator.md     # Task routing and coordination
-│   ├── create-role.md      # Dynamic role creation
-│   ├── match-role.md       # Role matching logic
-│   ├── task-logger.md      # Task logging and audit
-│   └── memory-manager.md   # Persistent memory management
-├── memory/
-│   └── system.md           # Global system memory
-├── knowledgebase/
-│   └── personal.md         # Personal preferences and knowledge
-└── logs/                   # Task execution logs (auto-generated)
+├── roles/              # Role definitions (orchestrator + user-created)
+├── skills/             # Skill prompts (core + user-created)
+├── memory/             # Persistent memory files
+├── knowledgebase/      # Personal knowledge base
+└── logs/               # Task execution logs (auto-generated)
 ```
 
 ## License

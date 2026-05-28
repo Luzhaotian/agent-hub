@@ -9,18 +9,20 @@
 ### 1. 安装
 
 ```bash
-npx agent-hub install ~/.agent-hub
+# 通过 npm（发布后可用）
+npx agent-hub install ~/.agent-hub               # macOS / Linux
+npx agent-hub install %USERPROFILE%\.agent-hub   # Windows
+
+# 或克隆到本地运行
+git clone https://github.com/Luzhaotian/agent-hub.git
+cd agent-hub && node cli.js install ~/.agent-hub
 ```
 
-一行命令，将所有核心文件（角色、技能、记忆模板、知识库模板）复制到本地目录。
+支持 `~` 路径展开 — `~` 会自动解析为用户主目录，全平台通用。
 
-### 2. 个性化
+### 2. 使用
 
-编辑 `~/.agent-hub/knowledgebase/personal.md`，填入你的技术栈、编码习惯和偏好。
-
-### 3. 使用
-
-在你的 AI 代理中加载 `skills/orchestrator.md`，然后提交任务 — 编排者会自动匹配或创建角色、执行任务、记录日志并更新记忆。
+在 AI 代理中加载 `skills/orchestrator.md`，然后提交任务：
 
 ```
 你的请求
@@ -30,13 +32,16 @@ npx agent-hub install ~/.agent-hub
   → 记录日志 + 更新记忆
 ```
 
-### 4. 升级
+编辑 `knowledgebase/personal.md`，告诉系统你的技术栈和偏好。
+
+### 3. 升级
 
 ```bash
 npx agent-hub upgrade ~/.agent-hub
+# 或: node cli.js upgrade ~/.agent-hub
 ```
 
-仅更新核心模板文件，你创建的角色、技能、记忆、知识库和日志**不会被覆盖**。
+仅更新核心文件，你创建的角色、技能、记忆、知识库和日志**不会被覆盖**。
 
 ## 命令
 
@@ -51,7 +56,7 @@ npx agent-hub upgrade ~/.agent-hub
 
 ### Cursor
 
-将 `.cursor/rules` 或项目设置指向安装目录的 `skills/` 文件夹，Cursor 会自动加载技能提示词。
+将 `.cursor/rules` 或项目设置指向安装目录的 `skills/` 文件夹。
 
 ### Claude Code
 
@@ -61,33 +66,21 @@ npx agent-hub upgrade ~/.agent-hub
 
 | 概念 | 说明 |
 |------|------|
-| **角色 (Roles)** | 具备特定能力、技能和标签的专用代理，根据用户需求动态创建。 |
-| **技能 (Skills)** | 模块化的 Markdown 文件，定义可复用的能力。通过 `find-skill` 发现并永久安装。 |
-| **记忆 (Memory)** | 跨会话的持久化上下文 — 全局记忆 (`memory/system.md`) 和角色记忆 (`memory/<role>.md`)。 |
-| **知识库 (Knowledge Base)** | 个人和领域知识文件 (`knowledgebase/`)，任务执行时自动参考。 |
-| **日志 (Logs)** | 结构化的任务日志 (`logs/`)，用于审计追踪和记忆提取。 |
+| **角色 (Roles)** | 具备能力、技能和标签的专用代理，按需动态创建。 |
+| **技能 (Skills)** | 模块化 Markdown 文件，定义可复用的能力。 |
+| **记忆 (Memory)** | 跨会话的持久化上下文，分全局和角色级别。 |
+| **知识库 (Knowledge Base)** | 个人和领域知识，任务执行时自动参考。 |
+| **日志 (Logs)** | 结构化任务日志，用于审计和记忆提取。 |
 
 ## 项目结构
 
-安装后，本地目录结构如下：
-
 ```
 ~/.agent-hub/
-├── .core-manifest.json     # 核心文件追踪（用于升级）
-├── roles/
-│   ├── index.json          # 角色注册表
-│   └── orchestrator.yaml   # 主协调者角色定义
-├── skills/
-│   ├── orchestrator.md     # 任务路由与协调
-│   ├── create-role.md      # 动态角色创建
-│   ├── match-role.md       # 角色匹配逻辑
-│   ├── task-logger.md      # 任务日志与审计
-│   └── memory-manager.md   # 持久化记忆管理
-├── memory/
-│   └── system.md           # 全局系统记忆
-├── knowledgebase/
-│   └── personal.md         # 个人偏好与知识
-└── logs/                   # 任务执行日志（自动生成）
+├── roles/              # 角色定义（编排者 + 用户创建）
+├── skills/             # 技能提示词（核心 + 用户创建）
+├── memory/             # 持久化记忆文件
+├── knowledgebase/      # 个人知识库
+└── logs/               # 任务执行日志（自动生成）
 ```
 
 ## 开源协议
