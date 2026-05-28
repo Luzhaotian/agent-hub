@@ -22,7 +22,7 @@ Supports `~` path expansion — `~` is automatically resolved to your home direc
 
 ### 2. Use
 
-Load `skills/orchestrator.md` in your AI agent, then submit tasks:
+Point your editor to the installation directory. The `SKILLS.md` file is the main entry point. Then submit tasks:
 
 ```
 Your request
@@ -56,11 +56,11 @@ Only core files are updated. Your roles, skills, memory, knowledge base, and log
 
 ### Cursor
 
-Point `.cursor/rules` or project settings to your installation directory's `skills/` folder.
+Point `.cursor/rules` or project settings to your installation directory. The `SKILLS.md` file will be auto-detected.
 
 ### Claude Code
 
-Reference skill files in your `CLAUDE.md`, or load `skills/orchestrator.md` as a system prompt.
+Reference `SKILLS.md` in your `CLAUDE.md`, or load it directly as a system prompt.
 
 ## Core Concepts
 
@@ -76,6 +76,7 @@ Reference skill files in your `CLAUDE.md`, or load `skills/orchestrator.md` as a
 
 ```
 ~/.agent-hub/
+├── SKILLS.md           # Main entry point for editors
 ├── roles/              # Role definitions (orchestrator + user-created)
 ├── skills/             # Skill prompts (core + user-created)
 ├── memory/             # Persistent memory files

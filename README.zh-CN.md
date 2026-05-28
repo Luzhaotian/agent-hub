@@ -22,7 +22,7 @@ cd agent-hub && node cli.js install ~/.agent-hub
 
 ### 2. 使用
 
-在 AI 代理中加载 `skills/orchestrator.md`，然后提交任务：
+将编辑器指向安装目录，`SKILLS.md` 是主入口文件，然后提交任务：
 
 ```
 你的请求
@@ -56,11 +56,11 @@ npx agent-hub upgrade ~/.agent-hub
 
 ### Cursor
 
-将 `.cursor/rules` 或项目设置指向安装目录的 `skills/` 文件夹。
+将 `.cursor/rules` 或项目设置指向安装目录，`SKILLS.md` 会被自动识别。
 
 ### Claude Code
 
-在 `CLAUDE.md` 中引用技能文件，或直接加载 `skills/orchestrator.md` 作为系统提示词。
+在 `CLAUDE.md` 中引用 `SKILLS.md`，或直接加载为系统提示词。
 
 ## 核心概念
 
@@ -76,6 +76,7 @@ npx agent-hub upgrade ~/.agent-hub
 
 ```
 ~/.agent-hub/
+├── SKILLS.md           # 编辑器主入口文件
 ├── roles/              # 角色定义（编排者 + 用户创建）
 ├── skills/             # 技能提示词（核心 + 用户创建）
 ├── memory/             # 持久化记忆文件
