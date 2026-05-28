@@ -1,11 +1,88 @@
- - 我想要一个通用的智能体插件，可以插入到任何编辑器或者 Agent 里，使用 Skills 的格式处理
+# Agent Hub
 
- - 我希望你是一个统筹的角色。拥有创建角色的能力，并给出角色的描述，以及角色的技能。并且可以使用 find skill 技能来获取相应的 skills 并且存储在这个项目里，成为永久技能，MCP 同理
+A universal agent plugin system that can be plugged into any editor or AI agent. Built on a Skills-based architecture with persistent roles, memory, and knowledge management.
 
- - 创建的角色是永久的，并且有记忆功能，当用户再一次提需求时，查看现有角色是否能满足，如果可以满足，则使用这个角色，如果不满足，则创建一个新的角色
+## Overview
 
- - 每一次的任务，要有日志，并且根据过往日志，查询可用信息形成记忆
+Agent Hub is a meta-agent framework that acts as an orchestrator — it can create specialized roles, acquire skills dynamically, maintain persistent memory across sessions, and build a knowledge base tailored to you.
 
- - 我希望当前这个项目增加一个知识库的文件夹，里面有一个专属于我的文件，我会在这个文件记录一些我的习惯、知识等，后续根据需求需要，也可以下载一些现有的理论知识存放在这。为后续查询提供理论基础
+### Core Concepts
 
- - 这个项目需要部署到 github 上
+- **Roles** — Specialized agents with defined capabilities, skills, and tags. Created dynamically based on user needs.
+- **Skills** — Modular Markdown files that define reusable capabilities. Can be discovered via `find-skill` and installed permanently.
+- **Memory** — Persistent context across sessions, both system-wide and per-role.
+- **Knowledge Base** — Personal and domain knowledge files for reference during task execution.
+- **Logs** — Structured task logs for audit trails and memory extraction.
+
+## Project Structure
+
+```
+agent-hub/
+├── roles/
+│   ├── index.json          # Role registry
+│   └── orchestrator.yaml   # Master coordinator role
+├── skills/
+│   ├── orchestrator.md     # Task routing and coordination
+│   ├── create-role.md      # Dynamic role creation
+│   ├── match-role.md       # Role matching logic
+│   ├── task-logger.md      # Task logging and audit
+│   └── memory-manager.md   # Persistent memory management
+├── memory/
+│   └── system.md           # Global system memory
+├── knowledgebase/
+│   └── personal.md         # Personal preferences and knowledge
+├── logs/                   # Task execution logs
+└── mcp/                    # MCP server configurations
+```
+
+## How It Works
+
+1. **User submits a request** — The orchestrator analyzes the request.
+2. **Role matching** — Existing roles are checked against the request (tags, description, skills).
+3. **Delegation or creation** — If a match is found, the task is delegated. Otherwise, a new role is created with the required skills.
+4. **Skill acquisition** — Missing skills are discovered via `find-skill` and installed permanently.
+5. **Logging** — Every task is logged with timestamps, steps taken, and outcomes.
+6. **Memory extraction** — Key insights from tasks are extracted into persistent memory for future use.
+
+## Roles
+
+| Role | Description | Tags |
+|------|-------------|------|
+| `orchestrator` | Master coordinator. Routes tasks, creates roles, manages skills and memory. | `core`, `coordinator`, `meta` |
+
+New roles are created automatically when existing ones cannot fulfill a request.
+
+## Skills
+
+| Skill | Purpose |
+|-------|---------|
+| `orchestrator` | Task routing, role matching, and system coordination |
+| `create-role` | Define and register new roles dynamically |
+| `match-role` | Find the best existing role for a given request |
+| `task-logger` | Log every task execution for audit and memory extraction |
+| `memory-manager` | Maintain persistent memory across sessions |
+
+## Knowledge Base
+
+The `knowledgebase/` directory stores reference material:
+
+- `personal.md` — Your personal preferences, habits, and domain knowledge. Edit this file directly to teach the system about you.
+
+Additional knowledge files can be added as needed for specific domains or projects.
+
+## Memory System
+
+Memory is organized in two layers:
+
+- **`memory/system.md`** — Global memory shared across all roles (project conventions, user preferences, learned patterns).
+- **`memory/<role-name>.md`** — Per-role memory for specialized context.
+
+Memory is automatically updated after task completion through insight extraction.
+
+## Usage
+
+This project is designed to be used as a plugin for editors or AI agents that support the Skills format. Point your agent's skill directory to this repository to enable the full role orchestration system.
+
+## License
+
+MIT
