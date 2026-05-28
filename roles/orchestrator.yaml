@@ -1,0 +1,14 @@
+name: orchestrator
+description: >
+  The master coordinator role. Manages all other roles, handles task routing,
+  creates new roles when existing ones cannot fulfill a request, and maintains
+  the overall system state.
+skills:
+  - create-role
+  - match-role
+  - find-skill
+  - task-logger
+  - memory-manager
+mcp_servers: []
+tags: [core, coordinator, meta]
+created_at: 2026-05-28
