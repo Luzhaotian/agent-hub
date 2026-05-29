@@ -132,35 +132,41 @@ function setupCursor(destPath) {
     process.exit(1);
   }
 
-  const rulesDir = path.join(process.cwd(), '.cursor', 'rules');
-  const rulesFile = path.join(rulesDir, 'agent-hub.md');
+  const skillsDir = path.join(dest, 'skills');
+  if (!fs.existsSync(skillsDir)) {
+    console.log(`Skills directory not found: ${skillsDir}`);
+    process.exit(1);
+  }
 
+  const rulesDir = path.join(process.cwd(), '.cursor', 'rules');
   fs.mkdirSync(rulesDir, { recursive: true });
 
-  const content = `---
-alwaysApply: true
+  const skillFiles = fs.readdirSync(skillsDir).filter(f => f.endsWith('.md'));
+  let created = 0;
+
+  for (const file of skillFiles) {
+    const skillName = path.basename(file, '.md');
+    const skillContent = fs.readFileSync(path.join(skillsDir, file), 'utf-8');
+    const isOrchestrator = skillName === 'orchestrator';
+
+    const ruleContent = `---
+alwaysApply: ${isOrchestrator}
+description: ${skillName}
 ---
 
-Read and follow the agent hub system defined in ${dest}/SKILLS.md.
+${skillContent}
 
-The agent hub files are located at:
-- Main entry: ${dest}/SKILLS.md
-- Roles: ${dest}/roles/
-- Skills: ${dest}/skills/
-- Memory: ${dest}/memory/
-- Knowledge base: ${dest}/knowledgebase/
-- Logs: ${dest}/logs/
-
-When a user submits a request, act as the orchestrator:
-1. Read all role files in ${dest}/roles/ to understand available capabilities.
-2. Match the request to the best-fit role.
-3. If no match, create a new role using the create-role skill.
-4. Log the task to ${dest}/logs/.
-5. Update memory in ${dest}/memory/.
+---
+Source: ${dest}/skills/${file}
 `;
 
-  fs.writeFileSync(rulesFile, content);
-  console.log(`Cursor rules created at ${rulesFile}`);
+    fs.writeFileSync(path.join(rulesDir, `${skillName}.md`), ruleContent);
+    created++;
+    console.log(`  ${isOrchestrator ? '*' : ' '} ${skillName}`);
+  }
+
+  console.log(`\nCreated ${created} rule(s) in ${rulesDir}`);
+  console.log('Restart Cursor to activate. Use /<skill-name> to invoke a skill.');
 }
 
 function help() {
