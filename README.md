@@ -64,7 +64,7 @@ npx agent-hub setup-cursor
 # or: node cli.js setup-cursor
 ```
 
-This generates one rule file per skill in `.cursor/rules/`. Restart Cursor, then type `/skill-name` (e.g. `/orchestrator`, `/create-role`) to invoke a skill.
+This generates `.cursor/rules/agent-hub.md`. Restart Cursor, then type `@agent-hub` to activate the whole system.
 
 ### Claude Code
 

@@ -64,7 +64,7 @@ npx agent-hub setup-cursor
 # 或: node cli.js setup-cursor
 ```
 
-为每个 skill 在 `.cursor/rules/` 生成独立规则文件。重启 Cursor 后，输入 `/skill-name`（如 `/orchestrator`、`/create-role`）即可调用对应技能。
+生成 `.cursor/rules/agent-hub.md`。重启 Cursor 后，输入 `@agent-hub` 即可激活整个系统。
 
 ### Claude Code
 

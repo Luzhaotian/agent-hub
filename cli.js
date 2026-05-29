@@ -141,32 +141,26 @@ function setupCursor(destPath) {
   const rulesDir = path.join(process.cwd(), '.cursor', 'rules');
   fs.mkdirSync(rulesDir, { recursive: true });
 
+  // Read all skills and merge into one file
   const skillFiles = fs.readdirSync(skillsDir).filter(f => f.endsWith('.md'));
-  let created = 0;
+  const skillsContent = skillFiles.map(file => {
+    const name = path.basename(file, '.md');
+    const content = fs.readFileSync(path.join(skillsDir, file), 'utf-8');
+    return `## ${name}\n\n${content}`;
+  }).join('\n\n---\n\n');
 
-  for (const file of skillFiles) {
-    const skillName = path.basename(file, '.md');
-    const skillContent = fs.readFileSync(path.join(skillsDir, file), 'utf-8');
-    const isOrchestrator = skillName === 'orchestrator';
-
-    const ruleContent = `---
-alwaysApply: ${isOrchestrator}
-description: ${skillName}
+  const ruleContent = `---
+alwaysApply: false
+description: Agent Hub - 智能体编排系统
 ---
 
-${skillContent}
-
----
-Source: ${dest}/skills/${file}
+${skillsContent}
 `;
 
-    fs.writeFileSync(path.join(rulesDir, `${skillName}.md`), ruleContent);
-    created++;
-    console.log(`  ${isOrchestrator ? '*' : ' '} ${skillName}`);
-  }
-
-  console.log(`\nCreated ${created} rule(s) in ${rulesDir}`);
-  console.log('Restart Cursor to activate. Use /<skill-name> to invoke a skill.');
+  const rulesFile = path.join(rulesDir, 'agent-hub.md');
+  fs.writeFileSync(rulesFile, ruleContent);
+  console.log(`Cursor rules created at ${rulesFile}`);
+  console.log('Restart Cursor, then type @agent-hub to activate.');
 }
 
 function help() {
