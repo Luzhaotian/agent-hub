@@ -50,13 +50,21 @@ Only core files are updated. Your roles, skills, memory, knowledge base, and log
 | `agent-hub install <path>` | Install to a local directory |
 | `agent-hub upgrade [path]` | Upgrade core files (preserves user data) |
 | `agent-hub list [path]` | Show installed core and user files |
+| `agent-hub setup-cursor [path]` | Generate Cursor rules in current project |
 | `agent-hub help` | Show help |
 
 ## Integration
 
 ### Cursor
 
-Point `.cursor/rules` or project settings to your installation directory. The `SKILLS.md` file will be auto-detected.
+Run in your project root:
+
+```bash
+npx agent-hub setup-cursor
+# or: node cli.js setup-cursor
+```
+
+This generates `.cursor/rules/agent-hub.md` pointing to your installation.
 
 ### Claude Code
 

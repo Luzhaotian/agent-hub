@@ -125,6 +125,44 @@ function list(destPath) {
   });
 }
 
+function setupCursor(destPath) {
+  const dest = destPath ? path.resolve(expandHome(destPath)) : findInstall();
+  if (!dest) {
+    console.log('No Agent Hub installation found. Use "agent-hub install <path>" first.');
+    process.exit(1);
+  }
+
+  const rulesDir = path.join(process.cwd(), '.cursor', 'rules');
+  const rulesFile = path.join(rulesDir, 'agent-hub.md');
+
+  fs.mkdirSync(rulesDir, { recursive: true });
+
+  const content = `---
+alwaysApply: true
+---
+
+Read and follow the agent hub system defined in ${dest}/SKILLS.md.
+
+The agent hub files are located at:
+- Main entry: ${dest}/SKILLS.md
+- Roles: ${dest}/roles/
+- Skills: ${dest}/skills/
+- Memory: ${dest}/memory/
+- Knowledge base: ${dest}/knowledgebase/
+- Logs: ${dest}/logs/
+
+When a user submits a request, act as the orchestrator:
+1. Read all role files in ${dest}/roles/ to understand available capabilities.
+2. Match the request to the best-fit role.
+3. If no match, create a new role using the create-role skill.
+4. Log the task to ${dest}/logs/.
+5. Update memory in ${dest}/memory/.
+`;
+
+  fs.writeFileSync(rulesFile, content);
+  console.log(`Cursor rules created at ${rulesFile}`);
+}
+
 function help() {
   console.log(`
 Agent Hub - Universal Agent Plugin System
@@ -133,6 +171,7 @@ Usage:
   agent-hub install <path> [--force]   Install to a local directory
   agent-hub upgrade [path]             Upgrade core files (preserves user data)
   agent-hub list [path]                Show installed files
+  agent-hub setup-cursor [path]        Generate Cursor rules in current project
   agent-hub help                       Show this help
 
 Examples:
@@ -140,6 +179,7 @@ Examples:
   npx agent-hub install %USERPROFILE%\\.agent-hub # Windows
   npx agent-hub upgrade
   npx agent-hub list
+  npx agent-hub setup-cursor
 
 User-created roles, skills, memory, knowledge base, and logs are
 never touched during upgrades. Only core template files are updated.
@@ -213,6 +253,9 @@ switch (cmd) {
     break;
   case 'list':
     list(args[0]);
+    break;
+  case 'setup-cursor':
+    setupCursor(args[0]);
     break;
   case 'help':
   case '--help':

@@ -50,13 +50,21 @@ npx agent-hub upgrade ~/.agent-hub
 | `agent-hub install <path>` | 安装到本地目录 |
 | `agent-hub upgrade [path]` | 升级核心文件（保留用户数据） |
 | `agent-hub list [path]` | 查看已安装的核心文件和用户文件 |
+| `agent-hub setup-cursor [path]` | 在当前项目生成 Cursor 规则文件 |
 | `agent-hub help` | 查看帮助 |
 
 ## 集成方式
 
 ### Cursor
 
-将 `.cursor/rules` 或项目设置指向安装目录，`SKILLS.md` 会被自动识别。
+在项目根目录运行：
+
+```bash
+npx agent-hub setup-cursor
+# 或: node cli.js setup-cursor
+```
+
+自动生成 `.cursor/rules/agent-hub.md`，指向你的安装目录。
 
 ### Claude Code
 
