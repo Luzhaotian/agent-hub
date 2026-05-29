@@ -1,4 +1,8 @@
-# Task Logger Skill
+---
+name: task-logger
+description: "任务日志 — 记录每次任务执行的过程和结果，用于审计追踪和记忆提取。"
+disable-model-invocation: false
+---
 
 Log every task execution for audit and memory extraction.
 

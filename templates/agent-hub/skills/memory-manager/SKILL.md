@@ -1,4 +1,8 @@
-# Memory Manager Skill
+---
+name: memory-manager
+description: "记忆管理 — 维护跨会话的持久化记忆，提取任务洞察，合并和整理记忆。"
+disable-model-invocation: false
+---
 
 Maintain persistent memory across sessions for roles and the system.
 

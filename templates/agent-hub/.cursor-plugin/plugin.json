@@ -1,0 +1,11 @@
+{
+  "name": "agent-hub",
+  "displayName": "Agent Hub",
+  "version": "1.0.0",
+  "description": "智能体编排系统 — 角色管理、技能发现、记忆持久化、知识库",
+  "author": {
+    "name": "Agent Hub"
+  },
+  "keywords": ["agent", "orchestrator", "skills", "memory", "roles"],
+  "skills": "./skills/"
+}

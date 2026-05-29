@@ -1,4 +1,8 @@
-# Match Role Skill
+---
+name: match-role
+description: "角色匹配 — 根据用户请求，在已有角色中找到最合适的角色进行委派。"
+disable-model-invocation: false
+---
 
 Find the best matching existing role for a user request.
 

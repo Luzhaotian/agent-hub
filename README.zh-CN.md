@@ -2,7 +2,7 @@
 
 [English](./README.md)
 
-一个通用的智能体插件系统，基于 Skills 架构构建，支持持久化的角色、记忆和知识管理。可接入任何支持 Skills 格式的编辑器或 AI 代理（Cursor、Claude Code 等）。
+一个通用的智能体插件系统，基于 Skills 架构构建，支持持久化的角色、记忆和知识管理。像内置 skill 一样全局可用，无需每个项目单独配置。
 
 ## 快速开始
 
@@ -18,11 +18,11 @@ git clone https://github.com/Luzhaotian/agent-hub.git
 cd agent-hub && node cli.js install ~/.agent-hub
 ```
 
-支持 `~` 路径展开 — `~` 会自动解析为用户主目录，全平台通用。
+安装会将 skills 注册到 `~/.claude/skills/`，全局生效。
 
 ### 2. 使用
 
-将编辑器指向安装目录，`SKILLS.md` 是主入口文件，然后提交任务：
+重启编辑器，在对话框中输入 `/orchestrator` 激活系统：
 
 ```
 你的请求
@@ -32,13 +32,12 @@ cd agent-hub && node cli.js install ~/.agent-hub
   → 记录日志 + 更新记忆
 ```
 
-编辑 `knowledgebase/personal.md`，告诉系统你的技术栈和偏好。
+编辑 `~/.agent-hub/knowledgebase/personal.md`，告诉系统你的技术栈和偏好。
 
 ### 3. 升级
 
 ```bash
 npx agent-hub upgrade ~/.agent-hub
-# 或: node cli.js upgrade ~/.agent-hub
 ```
 
 仅更新核心文件，你创建的角色、技能、记忆、知识库和日志**不会被覆盖**。
@@ -47,50 +46,48 @@ npx agent-hub upgrade ~/.agent-hub
 
 | 命令 | 说明 |
 |------|------|
-| `agent-hub install <path>` | 安装到本地目录 |
+| `agent-hub install <path>` | 安装并全局注册 skills |
+| `agent-hub setup [path]` | 在当前项目生成 `.cursor/rules/`（Cursor 用） |
 | `agent-hub upgrade [path]` | 升级核心文件（保留用户数据） |
 | `agent-hub list [path]` | 查看已安装的核心文件和用户文件 |
-| `agent-hub setup-cursor [path]` | 在当前项目生成 Cursor 规则文件 |
 | `agent-hub help` | 查看帮助 |
 
-## 集成方式
+## 可用技能
 
-### Cursor
-
-在项目根目录运行：
-
-```bash
-npx agent-hub setup-cursor
-# 或: node cli.js setup-cursor
-```
-
-生成 `.cursor/rules/agent-hub.mdc`。重启 Cursor 后，在对话中输入 `@rules/agent-hub` 即可激活整个系统。
-
-### Claude Code
-
-在 `CLAUDE.md` 中引用 `SKILLS.md`，或直接加载为系统提示词。
-
-## 核心概念
-
-| 概念 | 说明 |
-|------|------|
-| **角色 (Roles)** | 具备能力、技能和标签的专用代理，按需动态创建。 |
-| **技能 (Skills)** | 模块化 Markdown 文件，定义可复用的能力。 |
-| **记忆 (Memory)** | 跨会话的持久化上下文，分全局和角色级别。 |
-| **知识库 (Knowledge Base)** | 个人和领域知识，任务执行时自动参考。 |
-| **日志 (Logs)** | 结构化任务日志，用于审计和记忆提取。 |
+| 技能 | 触发方式 | 说明 |
+|------|----------|------|
+| `/orchestrator` | 任何任务请求 | 路由任务、匹配/创建角色、管理记忆 |
+| `/create-role` | 需要新角色时 | 动态定义和注册新角色 |
+| `/match-role` | 任务委派前 | 为请求找到最合适的已有角色 |
+| `/task-logger` | 任务执行中 | 记录任务日志用于审计和记忆提取 |
+| `/memory-manager` | 任务完成后 | 维护跨会话的持久化记忆 |
 
 ## 项目结构
 
 ```
 ~/.agent-hub/
-├── SKILLS.md           # 编辑器主入口文件
-├── roles/              # 角色定义（编排者 + 用户创建）
-├── skills/             # 技能提示词（核心 + 用户创建）
-├── memory/             # 持久化记忆文件
-├── knowledgebase/      # 个人知识库
-└── logs/               # 任务执行日志（自动生成）
+├── .cursor-plugin/plugin.json  # 插件配置
+├── skills/
+│   ├── orchestrator/SKILL.md   # /orchestrator
+│   ├── create-role/SKILL.md    # /create-role
+│   ├── match-role/SKILL.md     # /match-role
+│   ├── task-logger/SKILL.md    # /task-logger
+│   └── memory-manager/SKILL.md # /memory-manager
+├── roles/                      # 角色定义（YAML）
+├── memory/                     # 持久化记忆
+├── knowledgebase/              # 个人知识库
+└── logs/                       # 任务执行日志（自动生成）
 ```
+
+## 扩展性
+
+在 `skills/` 目录下创建新文件夹即可添加自定义技能：
+
+```
+~/.agent-hub/skills/my-skill/SKILL.md
+```
+
+然后重新执行 `agent-hub install --force ~/.agent-hub` 注册新技能。
 
 ## 开源协议
 

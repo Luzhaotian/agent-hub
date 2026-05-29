@@ -1,4 +1,8 @@
-# Create Role Skill
+---
+name: create-role
+description: "创建新角色 — 当现有角色无法处理用户请求时，定义新的专用角色并注册。"
+disable-model-invocation: false
+---
 
 Create a new role in the agent system.
 

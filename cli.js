@@ -43,9 +43,38 @@ function install(destPath, force = false) {
   };
   fs.writeFileSync(path.join(dest, CORE_MANIFEST), JSON.stringify(manifest, null, 2));
 
+  // Register skills globally in ~/.claude/skills/
+  registerSkills(dest);
+
   console.log(`Agent Hub installed to ${dest}`);
   console.log('Edit knowledgebase/personal.md to personalize your setup.');
-  console.log('Then load skills/orchestrator.md in your AI agent to get started.');
+  console.log('Restart your editor, then use /orchestrator to activate.');
+}
+
+function registerSkills(dest) {
+  const skillsDir = path.join(dest, 'skills');
+  if (!fs.existsSync(skillsDir)) return;
+
+  const claudeSkillsDir = path.join(os.homedir(), '.claude', 'skills');
+  fs.mkdirSync(claudeSkillsDir, { recursive: true });
+
+  const skillDirs = fs.readdirSync(skillsDir, { withFileTypes: true })
+    .filter(d => d.isDirectory());
+
+  for (const dir of skillDirs) {
+    const skillFile = path.join(skillsDir, dir.name, 'SKILL.md');
+    if (!fs.existsSync(skillFile)) continue;
+
+    const linkPath = path.join(claudeSkillsDir, dir.name);
+    const targetPath = path.join(skillsDir, dir.name);
+
+    // Remove existing symlink if present
+    if (fs.existsSync(linkPath)) {
+      fs.unlinkSync(linkPath);
+    }
+
+    fs.symlinkSync(targetPath, linkPath);
+  }
 }
 
 function upgrade(destPath) {
@@ -87,8 +116,9 @@ function upgrade(destPath) {
   manifest.last_upgrade = new Date().toISOString();
   fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
 
-  console.log(`Upgraded ${updated} core file(s) in ${dest}`);
   if (updated > 0) {
+    registerSkills(dest);
+    console.log(`Upgraded ${updated} core file(s) in ${dest}`);
     console.log('Updated files:', upgradedFiles.map(f => f.path).join(', '));
   } else {
     console.log('Everything is up to date.');
@@ -125,7 +155,7 @@ function list(destPath) {
   });
 }
 
-function setupCursor(destPath) {
+function setup(destPath) {
   const dest = destPath ? path.resolve(expandHome(destPath)) : findInstall();
   if (!dest) {
     console.log('No Agent Hub installation found. Use "agent-hub install <path>" first.');
@@ -141,27 +171,23 @@ function setupCursor(destPath) {
   const rulesDir = path.join(process.cwd(), '.cursor', 'rules');
   fs.mkdirSync(rulesDir, { recursive: true });
 
-  // Read all skills and merge into one file
-  const skillFiles = fs.readdirSync(skillsDir).filter(f => f.endsWith('.md'));
-  const skillsContent = skillFiles.map(file => {
-    const name = path.basename(file, '.md');
-    const content = fs.readFileSync(path.join(skillsDir, file), 'utf-8');
-    return `## ${name}\n\n${content}`;
-  }).join('\n\n---\n\n');
+  // Read each skill and generate a rule file
+  const skillDirs = fs.readdirSync(skillsDir, { withFileTypes: true })
+    .filter(d => d.isDirectory());
 
-  const ruleContent = `---
-description: Agent Hub - 智能体编排系统，包含任务路由、角色管理、技能发现、记忆管理等能力
-globs:
-alwaysApply: false
----
+  let created = 0;
+  for (const dir of skillDirs) {
+    const skillFile = path.join(skillsDir, dir.name, 'SKILL.md');
+    if (!fs.existsSync(skillFile)) continue;
 
-${skillsContent}
-`;
+    const content = fs.readFileSync(skillFile, 'utf-8');
+    const ruleFile = path.join(rulesDir, `${dir.name}.mdc`);
+    fs.writeFileSync(ruleFile, content);
+    created++;
+  }
 
-  const rulesFile = path.join(rulesDir, 'agent-hub.mdc');
-  fs.writeFileSync(rulesFile, ruleContent);
-  console.log(`Cursor rules created at ${rulesFile}`);
-  console.log('Restart Cursor, then type @rules/agent-hub in chat to activate.');
+  console.log(`Created ${created} rule(s) in ${rulesDir}`);
+  console.log('Restart Cursor, then use @rules/<skill-name> to activate.');
 }
 
 function help() {
@@ -169,10 +195,10 @@ function help() {
 Agent Hub - Universal Agent Plugin System
 
 Usage:
-  agent-hub install <path> [--force]   Install to a local directory
+  agent-hub install <path> [--force]   Install and register skills globally
+  agent-hub setup [path]               Generate .cursor/rules in current project
   agent-hub upgrade [path]             Upgrade core files (preserves user data)
   agent-hub list [path]                Show installed files
-  agent-hub setup-cursor [path]        Generate Cursor rules in current project
   agent-hub help                       Show this help
 
 Examples:
@@ -180,10 +206,9 @@ Examples:
   npx agent-hub install %USERPROFILE%\\.agent-hub # Windows
   npx agent-hub upgrade
   npx agent-hub list
-  npx agent-hub setup-cursor
 
-User-created roles, skills, memory, knowledge base, and logs are
-never touched during upgrades. Only core template files are updated.
+After install, use /orchestrator in Claude Code to activate.
+For Cursor, run 'agent-hub setup' in each project, then use @rules/orchestrator.
 `);
 }
 
@@ -255,8 +280,8 @@ switch (cmd) {
   case 'list':
     list(args[0]);
     break;
-  case 'setup-cursor':
-    setupCursor(args[0]);
+  case 'setup':
+    setup(args[0]);
     break;
   case 'help':
   case '--help':
