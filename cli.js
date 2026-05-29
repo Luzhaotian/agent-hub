@@ -150,17 +150,18 @@ function setupCursor(destPath) {
   }).join('\n\n---\n\n');
 
   const ruleContent = `---
+description: Agent Hub - 智能体编排系统，包含任务路由、角色管理、技能发现、记忆管理等能力
+globs:
 alwaysApply: false
-description: Agent Hub - 智能体编排系统
 ---
 
 ${skillsContent}
 `;
 
-  const rulesFile = path.join(rulesDir, 'agent-hub.md');
+  const rulesFile = path.join(rulesDir, 'agent-hub.mdc');
   fs.writeFileSync(rulesFile, ruleContent);
   console.log(`Cursor rules created at ${rulesFile}`);
-  console.log('Restart Cursor, then type @agent-hub to activate.');
+  console.log('Restart Cursor, then type @rules/agent-hub in chat to activate.');
 }
 
 function help() {

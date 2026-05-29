@@ -64,7 +64,7 @@ npx agent-hub setup-cursor
 # or: node cli.js setup-cursor
 ```
 
-This generates `.cursor/rules/agent-hub.md`. Restart Cursor, then type `@agent-hub` to activate the whole system.
+This generates `.cursor/rules/agent-hub.mdc`. Restart Cursor, then type `@rules/agent-hub` in chat to activate the whole system.
 
 ### Claude Code
 

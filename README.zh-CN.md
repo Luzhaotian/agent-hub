@@ -64,7 +64,7 @@ npx agent-hub setup-cursor
 # 或: node cli.js setup-cursor
 ```
 
-生成 `.cursor/rules/agent-hub.md`。重启 Cursor 后，输入 `@agent-hub` 即可激活整个系统。
+生成 `.cursor/rules/agent-hub.mdc`。重启 Cursor 后，在对话中输入 `@rules/agent-hub` 即可激活整个系统。
 
 ### Claude Code
 
