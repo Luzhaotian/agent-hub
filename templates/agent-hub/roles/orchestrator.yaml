@@ -2,7 +2,8 @@ name: orchestrator
 description: >
   The master coordinator role. Manages all other roles, handles task routing,
   creates new roles when existing ones cannot fulfill a request, and maintains
-  the overall system state.
+  the overall system state. Prefer matching a specialized worker role for
+  concrete coding/research tasks; use this role for coordination and meta work.
 skills:
   - create-role
   - match-role

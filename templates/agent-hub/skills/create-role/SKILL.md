@@ -6,6 +6,11 @@ disable-model-invocation: false
 
 Create a new role in the agent system.
 
+## Data Root
+
+Use `<data_root>` from `~/.agent-hub/config.json` (fallback `~/.agent-hub`).
+Write only under `<data_root>/roles/` and update `<data_root>/roles/index.json`.
+
 ## When to Use
 
 When the orchestrator determines that no existing role can handle a user request.
@@ -17,11 +22,16 @@ When the orchestrator determines that no existing role can handle a user request
    - **name**: kebab-case identifier (e.g., `frontend-developer`)
    - **description**: Clear description of what this role does and when to use it
    - **skills**: List of skill names this role needs
-   - **mcp_servers**: Any MCP servers this role depends on
+   - **mcp_servers**: Any MCP servers this role depends on (must already be configured in the editor; see `<data_root>/mcp/README.md`)
    - **tags**: Searchable tags for matching
-3. Check if required skills exist in `skills/`. If not, use `find-skill` to discover them.
-4. Write the role definition to `roles/<name>.yaml`.
-5. Update the role index.
+3. Check required skills under `<data_root>/skills/`. If missing, use `find-skill` to discover/install them. Abort role creation only if critical skills remain missing and the user declines a stub.
+4. Write `<data_root>/roles/<name>.yaml` using the template below.
+5. **Update the role index** `<data_root>/roles/index.json`:
+   - Read the existing JSON
+   - Append a new object to the `roles` array if `name` is not already present
+   - Fields: `name`, `description` (one-line), `tags`, `created_at`
+   - Write the file back with valid JSON (2-space indent)
+6. Confirm both the YAML file and the index entry exist before returning success.
 
 ## Template
 
@@ -35,6 +45,17 @@ skills:
 mcp_servers: []
 tags: [<tag1>, <tag2>]
 created_at: <YYYY-MM-DD>
+```
+
+## Index entry shape
+
+```json
+{
+  "name": "<role-name>",
+  "description": "<one-line summary>",
+  "tags": ["<tag1>", "<tag2>"],
+  "created_at": "<YYYY-MM-DD>"
+}
 ```
 
 ## Naming Conventions

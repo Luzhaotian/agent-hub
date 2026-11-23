@@ -2,44 +2,39 @@
 
 [中文](./README.zh-CN.md)
 
-A universal agent plugin system for Claude Code. Built on a **skill + role** architecture with persistent memory, task logging, and automatic skill discovery. Install once, works globally — no per-project setup needed.
+A universal agent plugin system for Claude Code (and Cursor). Built on a **skill + role** architecture with persistent memory, task logging, and skill discovery. Install once under `~/.agent-hub`, works globally.
 
 ## How It Works
 
 ```
-用户输入 /orchestrator
-  → orchestrator 分析请求
-  → 匹配已有角色？ → 委派执行
-  → 没有匹配？ → 创建新角色 + 发现并安装技能 → 执行
-  → 记录任务日志 + 更新持久化记忆
+User runs /orchestrator
+  → resolve data root (~/.agent-hub via config.json)
+  → match an existing role? → load role skills → execute as that role
+  → no match? → create-role + find-skill → register → execute
+  → write task log + update persistent memory (under data root)
 ```
 
-**Core loop**: orchestrator is the entry point. It reads your existing roles, matches the best one, and delegates. If nothing fits, it creates a new role on the fly — defining its skills, discovering them via `find-skill`, and registering everything automatically.
+**Core loop**: orchestrator is the entry point. It reads roles under the **data root** (not the project cwd), matches the best worker role, and **executes as that role** by loading its skills. If nothing fits, it creates a role, discovers missing skills via `find-skill`, registers them, then continues.
 
 ## Quick Start
 
 ### 1. Install
 
 ```bash
-# Clone and install
 git clone https://github.com/Luzhaotian/agent-hub.git
 cd agent-hub && node cli.js install ~/.agent-hub
 ```
 
-This copies all skills to `~/.agent-hub/` and registers them globally via symlinks in `~/.claude/skills/`.
+This copies templates to `~/.agent-hub/`, writes `config.json` with the absolute `data_root`, and registers skills under `~/.claude/skills/` (symlink, with copy fallback on Windows).
 
 ### 2. Verify
 
 Restart Claude Code, then type `/orchestrator`:
 
-- **Without a task**: you should see → `您好，我是通用智能体 orchestrator，请问有什么能帮你的`
-- **With a task**: you should see → `orchestrator 开始执行任务`
-
-If these messages appear, the system is working correctly.
+- **Without a task** → `您好，我是通用智能体 orchestrator，请问有什么能帮你的`
+- **With a task** → `orchestrator 开始执行任务`
 
 ### 3. Use
-
-Just describe what you need after `/orchestrator`:
 
 ```
 /orchestrator 帮我写一个 React 组件
@@ -47,67 +42,82 @@ Just describe what you need after `/orchestrator`:
 /orchestrator set up a new Express API
 ```
 
-The orchestrator will route to the appropriate role or create one if needed.
-
-### 4. Upgrade
+### 4. Upgrade / register
 
 ```bash
-node cli.js upgrade ~/.agent-hub
+node cli.js upgrade ~/.agent-hub   # update core files + re-register skills
+node cli.js register ~/.agent-hub  # re-register only (custom skills too)
 ```
 
-Only core files (skills, roles, plugin config) are updated. Your custom roles, memory, knowledge base, and logs are **never touched**.
+Upgrade updates changed core files, **adds new template files**, and always re-registers skills. Custom roles, memory, knowledge base, and logs are not overwritten.
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
 | `agent-hub install <path> [--force]` | Install and register skills globally |
-| `agent-hub upgrade [path]` | Upgrade core files (preserves user data) |
+| `agent-hub upgrade [path]` | Upgrade core files + re-register skills |
+| `agent-hub register [path]` | Re-register skills (including custom ones) |
 | `agent-hub list [path]` | Show installed core and user files |
-| `agent-hub setup [path]` | Generate `.cursor/rules/` in current project (Cursor only) |
+| `agent-hub setup [path]` | Generate `.cursor/rules/` in current project |
 | `agent-hub help` | Show help |
 
 ## Skills
 
 | Skill | Trigger | Description |
 |-------|---------|-------------|
-| `/orchestrator` | Any task request | Entry point — routes tasks, matches/creates roles, manages memory |
-| `/create-role` | When no role matches | Define and register new roles dynamically |
-| `/match-role` | Before delegation | Find the best existing role for a request |
-| `/task-logger` | During execution | Log tasks for audit trail and memory extraction |
-| `/memory-manager` | After completion | Maintain persistent memory across sessions |
+| `/orchestrator` | Any task request | Entry point — route, match/create roles, execute, memory |
+| `/match-role` | Before delegation | Find the best existing role |
+| `/create-role` | When no role matches | Define role YAML + update `roles/index.json` |
+| `/find-skill` | Missing skills | Discover/install skills into the data root |
+| `/task-logger` | During/after tasks | Audit logs under `<data_root>/logs/` |
+| `/memory-manager` | After completion | Persistent memory under `<data_root>/memory/` |
 
 ## System Architecture
 
 ```
-~/.agent-hub/
-├── .cursor-plugin/
-│   └── plugin.json              # Cursor plugin manifest
-├── skills/                      # Skill definitions
-│   ├── orchestrator/SKILL.md    # Master coordinator
-│   ├── create-role/SKILL.md     # Role factory
-│   ├── match-role/SKILL.md      # Role matcher
-│   ├── task-logger/SKILL.md     # Execution logger
-│   └── memory-manager/SKILL.md  # Memory manager
-├── roles/                       # Role definitions (YAML)
-│   └── orchestrator.yaml        # Built-in orchestrator role
-├── memory/                      # Persistent memory (auto-maintained)
-├── knowledgebase/               # Personal knowledge base
-└── logs/                        # Task execution logs (auto-generated)
+~/.agent-hub/                    # data root (see config.json)
+├── config.json                  # absolute data_root + version
+├── .cursor-plugin/plugin.json
+├── skills/                      # skill definitions (SKILL.md)
+│   ├── orchestrator/
+│   ├── match-role/
+│   ├── create-role/
+│   ├── find-skill/
+│   ├── task-logger/
+│   └── memory-manager/
+├── roles/                       # YAML roles + index.json
+├── memory/                      # persistent memory
+├── knowledgebase/               # personal knowledge
+├── logs/                        # task logs
+└── mcp/                         # MCP notes (no auto-install)
 ```
 
-Skills are registered globally via symlinks: `~/.claude/skills/<name>` → `~/.agent-hub/skills/<name>`
+Skills register globally: `~/.claude/skills/<name>` → `~/.agent-hub/skills/<name>`.
+
+**Important:** Agent Hub state always uses `<data_root>`. Project code edits stay in the project cwd.
+
+## Cursor
+
+```bash
+node cli.js setup ~/.agent-hub
+```
+
+Generates `.cursor/rules/*.mdc` (including `agent-hub-root.mdc` pointing at the data root). Restart Cursor, then use `@rules/orchestrator`.
 
 ## Extensibility
 
-Add a custom skill by creating a new folder:
-
 ```bash
 mkdir -p ~/.agent-hub/skills/my-skill
-# Write your skill prompt in SKILL.md
+# Write SKILL.md, then:
+node cli.js register ~/.agent-hub
 ```
 
-Then run `agent-hub upgrade ~/.agent-hub` to register it. The orchestrator will automatically discover and use it when matching roles.
+Use `register` (or `upgrade`) so new skills get linked into `~/.claude/skills/`.
+
+## MCP
+
+Roles may list `mcp_servers`, but Agent Hub does not install MCP servers. Configure them in your editor, then reference the names in role YAML. See `mcp/README.md` in the data root.
 
 ## License
 

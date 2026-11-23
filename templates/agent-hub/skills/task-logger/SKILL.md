@@ -6,13 +6,18 @@ disable-model-invocation: false
 
 Log every task execution for audit and memory extraction.
 
+## Data Root
+
+Use `<data_root>` from `~/.agent-hub/config.json` (fallback `~/.agent-hub`).
+Write logs only under `<data_root>/logs/`. Create the directory if missing.
+
 ## When to Use
 
 At the start and end of every task handled by any role.
 
 ## Log Format
 
-Each log file: `logs/YYYY-MM-DD-HH-mm-<task-slug>.md`
+Each log file: `<data_root>/logs/YYYY-MM-DD-HH-mm-<task-slug>.md`
 
 ```markdown
 # Task Log: <task-slug>
@@ -20,6 +25,7 @@ Each log file: `logs/YYYY-MM-DD-HH-mm-<task-slug>.md`
 - **Date**: YYYY-MM-DD HH:mm
 - **Role**: <role-name>
 - **Request**: <original user request>
+- **Data root**: <data_root>
 
 ## Execution
 
@@ -31,7 +37,7 @@ Each log file: `logs/YYYY-MM-DD-HH-mm-<task-slug>.md`
 
 - Outcome (success / partial / failed)
 - Key findings
-- Files created/modified
+- Files created/modified (project paths)
 
 ## Memory Notes
 
@@ -41,8 +47,9 @@ Each log file: `logs/YYYY-MM-DD-HH-mm-<task-slug>.md`
 ## Auto-extraction
 
 After logging, check if the task produced any reusable knowledge:
+
 - New patterns or conventions discovered
 - User preferences revealed
 - Solutions to recurring problems
 
-If yes, update the relevant role's memory or the knowledge base.
+If yes, hand off to `memory-manager` (or append notes under Memory Notes for later extraction).

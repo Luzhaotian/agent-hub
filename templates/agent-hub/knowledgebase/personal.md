@@ -3,6 +3,8 @@
 This file contains your personal preferences, habits, and domain knowledge.
 Edit this file directly to teach the agent system about you.
 
+Path: `<data_root>/knowledgebase/personal.md` (default `~/.agent-hub/knowledgebase/personal.md`).
+
 ## About Me
 
 <!-- Fill in your background -->

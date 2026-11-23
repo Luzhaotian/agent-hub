@@ -1,15 +1,41 @@
 {
   "name": "agent-hub",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A universal agent plugin system built on a Skills-based architecture with persistent roles, memory, and knowledge management.",
   "bin": {
     "agent-hub": "./cli.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node test/cli.test.js",
     "prepare": "husky"
   },
-  "keywords": ["agent", "ai", "skills", "orchestrator", "plugin"],
+  "files": [
+    "cli.js",
+    "templates/",
+    "LICENSE",
+    "README.md",
+    "README.zh-CN.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Luzhaotian/agent-hub.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Luzhaotian/agent-hub/issues"
+  },
+  "homepage": "https://github.com/Luzhaotian/agent-hub#readme",
+  "keywords": [
+    "agent",
+    "ai",
+    "skills",
+    "orchestrator",
+    "plugin",
+    "claude",
+    "cursor"
+  ],
   "license": "MIT",
   "devDependencies": {
     "husky": "^9.1.7"

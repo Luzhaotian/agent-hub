@@ -1,0 +1,60 @@
+# Agent Hub — Cursor Rules
+
+## Git Commit Message
+
+创建或修改 commit message 时，必须遵循本仓库 `.husky/commit-msg` 约定。**描述优先使用中文**（hook 要求描述必须包含汉字）。
+
+### 格式
+
+```
+<type>: <中文描述>
+```
+
+- 单行标题；type 小写英文，冒号后一个空格，再写中文描述
+- 描述说明「为什么 / 做了什么」，不要堆文件名列表
+- 描述不能为空；末尾不要加句号 `。`
+- 建议整行 ≤ 50 个字符（超出会警告，尽量简短）
+- 不要使用 `--no-verify` 跳过 hook，除非用户明确要求
+
+### type 取值
+
+| type | 用途 |
+|------|------|
+| `feat` | 新功能 |
+| `fix` | 修复 bug |
+| `docs` | 文档变更 |
+| `style` | 代码格式（不影响功能） |
+| `refactor` | 重构 |
+| `perf` | 性能优化 |
+| `test` | 测试相关 |
+| `build` | 构建系统或依赖变更 |
+| `ci` | CI 配置变更 |
+| `chore` | 构建/工具链/杂项 |
+| `revert` | 回退 |
+
+### 正确示例
+
+```
+feat: 添加 find-skill 技能发现
+fix: 修复 upgrade 无法追加新核心文件
+docs: 更新 README 说明 data root
+refactor: 统一技能路径为 data root
+test: 补充 install 与 upgrade 用例
+chore: 升级版本至 1.1.0
+```
+
+### 错误示例
+
+```
+feat: add find-skill          # 描述无中文
+feat:添加技能                  # 冒号后缺空格
+feat: 添加角色创建功能。        # 末尾有句号
+Add skill discovery           # 缺少 type 前缀
+feat: 更新 cli.js 和 README 以及 templates 下全部技能文件  # 过长且偏罗列
+```
+
+### Agent 行为
+
+- 用户要求提交时：用 HEREDOC 传入 message，格式与上表一致
+- 未要求提交时：不要擅自 commit
+- message 语言：默认中文；仅当用户明确要求英文时再用英文（但仍须满足 hook 的中文校验，或请用户调整 hook）
